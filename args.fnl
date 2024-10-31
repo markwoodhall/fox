@@ -31,6 +31,7 @@
 
         "--org" (start-new-command "org")
         "--css" (start-new-command "css")
+        "--footer" (start-new-command "footer")
 
         "--help" (start-new-command "help")
         "-h" (start-new-command "help")

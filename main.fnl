@@ -1,5 +1,6 @@
 (local args (require :args))
 (local display (require :display))
+(local fox (require :fox))
 
 (fn display-help []
   (io.stderr:write
@@ -16,9 +17,14 @@
     (if arguments.help
         (display-help)
         arguments.version
-        (display.render 
-          {:version "0.0.0"} 
-          (?. arguments.output 1) 
+        "v0.0.0"
+        arguments.html
+        (display.render
+          (fox.org->html 
+            (?. arguments.org 1) 
+            "templates/simple.html"
+            {:css (?. arguments.css 1)})
+          (?. arguments.output 1)
           io.stdout))))
 
 ;; give better tracebacks in development

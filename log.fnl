@@ -6,4 +6,5 @@
   (when (not (os.getenv "SILENT"))
     (print ...)))
 
-{: info : warn}
+{: info 
+ : warn }

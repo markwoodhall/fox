@@ -1,6 +1,6 @@
 LUA_DIR=lua
 LUA=lua/src/lua
-SRC=main.fnl args.fnl display.fnl log.fnl
+SRC=main.fnl org.fnl args.fnl display.fnl log.fnl template.fnl fox.fnl file.fnl
 
 fox: $(SRC) $(LUA) $(LUA_DIR)/src/liblua.a
 	@echo "Building.."

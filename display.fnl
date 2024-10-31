@@ -8,6 +8,6 @@
   (match format
     "json" (print-json data out)
     "raw" (print data)
-    _ (render data "json" out)))
+    _ (print data)))
 
 {: render}

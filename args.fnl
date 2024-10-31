@@ -27,6 +27,11 @@
   (for [i 0 (length arg)]
     (let [val (. arg i)]
       (match val
+        "html" (start-new-command "html")
+
+        "--org" (start-new-command "org")
+        "--css" (start-new-command "css")
+
         "--help" (start-new-command "help")
         "-h" (start-new-command "help")
         "-?" (start-new-command "help")

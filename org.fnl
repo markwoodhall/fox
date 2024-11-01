@@ -27,16 +27,17 @@
 (local ends-inline "(%C)%~")
 
 (var in-block false)
+(var in-src false)
 (var in-export false)
 
 (fn node [type v r]
 
   (case type
     :begin-quote (set in-block true)
-    :begin-src (set in-block true)
+    :begin-src (set in-src true)
     :begin-export (set in-export true)
     :end-quote (set in-block false)
-    :end-src (set in-block false)
+    :end-src (set in-src false)
     :end-export (set in-export false))
 
   (let [s (string.gsub v r "")]
@@ -94,6 +95,8 @@
         [:block-text v] 
         in-export
         [:html v]
+        in-src
+        [:code v]
         [:text (parse-text v)]))))
 
 (comment

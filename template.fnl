@@ -56,11 +56,12 @@
         :end-quote "</blockquote>"
         :begin-export ""
         :end-export ""
-        :begin-src "<code>"
-        :end-src "</code>"
+        :begin-src "<pre><code>"
+        :end-src "</code></pre>"
         :text (.. "<p>" (apply-text node) "</p>")
         :html node
-        :block-text (.. (string.gsub node "%s" "&nbsp;") "<br />")
+        :code (.. (string.gsub node "%s" "&nbsp;") "<br />")
+        :block-text (.. node "<br />")
         _ "")
       )))
 

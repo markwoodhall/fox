@@ -13,15 +13,13 @@
 
   With Fox you can *build* /simple/ websites from an org file using:
 
-  #+BEGIN_SRC bash
-
-  ./fox html \
-        --org readme.org \
-        --css https://cdn.simplecss.org/simple.min.css \
-        --footer "This website was generated with Fox" \
-        > docs/readme.html
-
-  #+END_SRC
+#+BEGIN_SRC bash
+./fox html \
+   --org readme.org \
+   --css https://cdn.simplecss.org/simple.min.css \
+   --footer "This website was generated with Fox" \
+   > docs/readme.html
+#+END_SRC
 
 
   *You* can view the html generated from this readme.org [[https://markwoodhall.github.io/fox/readme.html][here]]

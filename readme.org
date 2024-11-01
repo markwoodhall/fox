@@ -1,8 +1,34 @@
 #+TITLE: Fox
-* Fox
+* What?
 
-  Fox is a 
+  What is Fox?
 
-* Fox 2
+  #+BEGIN_QUOTE
+  Fox is a simple tool to generate simple websites from org mode files.
+  #+END_QUOTE
 
-  This if fox 2
+
+* Why?
+
+
+  With Fox you can *build* /simple/ websites an org file using:
+
+  #+BEGIN_SRC bash
+
+  ./fox html \
+        --org readme.org \
+        --css https://cdn.simplecss.org/simple.min.css \
+        --footer "This website was generated with Fox" \
+        > docs/readme.html
+
+  #+END_SRC
+
+
+  *You* can view the html genated from this readme.org [[https://markwoodhall.github.io/fox/readme.html][here]]
+
+#+BEGIN_EXPORT html
+<script async src="https://js.stripe.com/v3/pricing-table.js"></script>
+<stripe-pricing-table pricing-table-id="prctbl_1PPVYMByfLhKEshpQlq3dVGx"
+publishable-key="pk_live_51NJdTqByfLhKEshpzNjQmV9nERvHTE9zzS632pwzxWBENy463c7UijEkcos5qGOhD6p26M2MvuK7429tINybwuRU006vWBC0ou">
+</stripe-pricing-table>
+#+END_EXPORT

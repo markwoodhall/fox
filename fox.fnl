@@ -6,7 +6,7 @@
   (let [template (file.read template)
         org-file (file.read in)]
     (when (and org-file template)
-      (let [org-data (org.->org org-file)
+      (let [org-data (org.parse org-file)
             _ (set opts.org org-data)
             html (templates.apply-template opts template)]
         (if out 

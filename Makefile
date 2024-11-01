@@ -25,7 +25,14 @@ example: $(FOX)
 	./fox html \
 		--org readme.org \
 		--css https://cdn.simplecss.org/simple.min.css \
+		--footer "This website was generated with Fox" 
+
+generate: $(FOX)
+	@echo "Running.."
+	./fox html \
+		--org readme.org \
+		--css https://cdn.simplecss.org/simple.min.css \
 		--footer "This website was generated with Fox" \
-		> out.html
+		> docs/readme.html
 
 .PHONY: clean install repl

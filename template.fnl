@@ -4,15 +4,6 @@
     variable
     value))
 
-(fn apply-title [title html]
-  (->> html
-       (apply-variable
-         "${title}"
-         (or title ""))
-       (apply-variable
-         "${header}"
-         (or title ""))))
-
 (fn apply-footer [footer html]
   (->> html
        (apply-variable
@@ -26,31 +17,78 @@
       css-href
       html)))
 
-(fn apply-headings [data]
-  (accumulate [acc "" _ v (pairs data.org.headings)]
+(fn apply-node [nodes type]
+  (accumulate [acc "" 
+               _ [node-type node] (ipairs nodes)]
     (.. 
       acc
-      "<h2>" v "</h2>")))
+      (if (= type node-type)
+        node
+        "")
+      )))
 
-(fn apply-main [data html]
+(fn apply-text [text]
+  (accumulate [acc ""
+               _ [type data] (ipairs text)]
+    (.. acc
+        (case type
+          :begin-bold "<b>"
+          :end-bold "</b>"
+          :begin-italic "<i>"
+          :end-italic "</i>"
+          :begin-inline "<code>"
+          :end-inline "</code>"
+          :words (?. data 1)
+          :links (accumulate [links "" _ [href desc] (ipairs data)]
+                   (.. links "<a href=\"" href "\">" desc "</a> "))))))
+
+(fn apply-nodes [nodes]
+  (accumulate [acc "" 
+               _ [node-type node] (ipairs nodes)]
+    (.. 
+      acc
+      (case node-type
+        :heading-1 (.. "<h1>" node "</h1>")
+        :heading-2 (.. "<h2>" node "</h2>")
+        :heading-3 (.. "<h3>" node "</h3>")
+        :heading-4 (.. "<h4>" node "</h4>")
+        :begin-quote "<blockquote>"
+        :end-quote "</blockquote>"
+        :begin-export ""
+        :end-export ""
+        :begin-src "<code>"
+        :end-src "</code>"
+        :text (.. "<p>" (apply-text node) "</p>")
+        :html node
+        :block-text (.. (string.gsub node "%s" "&nbsp;") "<br />")
+        _ "")
+      )))
+
+(fn apply-main [nodes html]
   (apply-variable 
     "${main}"
-    (apply-headings data)
+    (apply-nodes nodes)
+    html))
+
+(fn apply-title [nodes html]
+  (apply-variable 
+    "${title}"
+    (apply-node nodes :meta-title)
+    html))
+
+(fn apply-header [nodes html]
+  (apply-variable 
+    "${header}"
+    (apply-node nodes :meta-title)
     html))
 
 (fn apply-template [data html]
   (->> 
     html
     (apply-css data.css)
-    (apply-title data.org.title)
-    (apply-main data)
+    (apply-title data.org)
+    (apply-header data.org)
+    (apply-main data.org)
     (apply-footer data.footer)))
-
-
-(comment
-  (accumulate [acc 0  _ v (pairs [1 2 3 4 5])]
-    (+ acc v))
-  (let [t (require :template)]
-    (t.apply-template {:org {:headings ["Hello" "Goodbye"]}} "${main}")))
 
 {: apply-template }

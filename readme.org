@@ -27,9 +27,9 @@
   *You* can view the html generated from this readme.org [[https://markwoodhall.github.io/fox/readme.html][here]]
 
 
-#+BEGIN_EXPORT html
-I'm available for hire!
-#+END_EXPORT
+* Who?
+
+  Fox is built by Mark Woodhall, I'm available to hire! 
 
 #+BEGIN_EXPORT html
 <script async src="https://js.stripe.com/v3/pricing-table.js"></script>

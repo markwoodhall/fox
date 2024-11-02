@@ -6,6 +6,8 @@
 (local begin-export "%#%+BEGIN_EXPORT")
 (local end-export "%#%+END_EXPORT")
 
+(local html "%#%+HTML:%s")
+
 (local begin-src "%#%+BEGIN_SRC")
 (local end-src "%#%+END_SRC")
 
@@ -13,6 +15,9 @@
 (local heading-2 "^%*%*%s")
 (local heading-3 "^%*%*%*%s")
 (local heading-4 "^%*%*%*%*%s")
+
+(local unordered-list "^%s+[%+%-]")
+(local ordered-list "^%s+[%d]%.%s")
 
 (local link "%[%[%C+%]%[%C+%]%]")
 (local link-part "%[%[(%C+)%]%[(%C+)%]%]")
@@ -80,6 +85,9 @@
       (string.match v heading-2) (node :heading-2 v heading-2)
       (string.match v heading-3) (node :heading-3 v heading-3)
       (string.match v heading-4) (node :heading-4 v heading-4)
+      (string.match v html) (node :html v html)
+      (string.match v unordered-list) (node :ul v unordered-list)
+      (string.match v ordered-list) (node :ol v ordered-list)
 
       (string.match v begin-quote) (node :begin-quote "" begin-quote)
       (string.match v end-quote) (node :end-quote "" end-quote)
@@ -94,7 +102,7 @@
         in-block 
         [:block-text v] 
         in-export
-        [:html v]
+        [:export v]
         in-src
         [:code v]
         [:text (parse-text v)]))))

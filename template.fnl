@@ -52,6 +52,8 @@
         :heading-2 (.. "<h2>" node "</h2>")
         :heading-3 (.. "<h3>" node "</h3>")
         :heading-4 (.. "<h4>" node "</h4>")
+        :ol (.. "<ol><li>" node "</li></ol>")
+        :ul (.. "<li>" node "</li>")
         :begin-quote "<blockquote>"
         :end-quote "</blockquote>"
         :begin-export ""
@@ -59,6 +61,7 @@
         :begin-src "<pre><code>"
         :end-src "</code></pre>"
         :text (.. "<p>" (apply-text node) "</p>")
+        :export node
         :html node
         :code (.. (string.gsub node "%s" "&nbsp;") "<br />")
         :block-text (.. node "<br />")

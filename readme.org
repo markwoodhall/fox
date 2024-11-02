@@ -7,6 +7,9 @@
   Fox is a simple tool to generate simple websites from org mode files.
   #+END_QUOTE
 
+*** Status
+
+  #+HTML: <b>Fox</b> is a work in progress and undergoing heavy change.
 
 * Why?
 
@@ -24,6 +27,27 @@
 
   *You* can view the html generated from this readme.org [[https://markwoodhall.github.io/fox/readme.html][here]]
 
+* Support
+
+  Org mode supports such a wide range of functionality, it isn't the goal of this project to support everything. 
+
+  The aim is to support the following subset of features to enable untuitive website creation:
+
+  1. Structure
+
+     + Headings
+     + Code blocks
+     + Block quoations
+
+  2. Text
+
+     + Bold/Italic/Strikethrough
+     + Links
+
+  3. HTML
+
+     + Inline HTML
+     + Block HTML
 
 * Who?
 

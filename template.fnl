@@ -52,8 +52,10 @@
         :heading-2 (.. "<h2>" node "</h2>")
         :heading-3 (.. "<h3>" node "</h3>")
         :heading-4 (.. "<h4>" node "</h4>")
-        :ol (.. "<ol><li>" node "</li></ol>")
-        :ul (.. "<li>" node "</li>")
+        :ol (.. "<ol><li>" node "</li>")
+        :ul (.. "<ul><li>" node "</li>")
+        :ol-li (.. "<li>" node "</li>")
+        :ul-li (.. "<li>" node "</li>")
         :begin-quote "<blockquote>"
         :end-quote "</blockquote>"
         :begin-export ""

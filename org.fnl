@@ -16,8 +16,8 @@
 (local heading-3 "^%*%*%*%s")
 (local heading-4 "^%*%*%*%*%s")
 
-(local unordered-list "^%s+[%+%-]")
-(local ordered-list "^%s+[%d]%.%s")
+(local list-item "%s+[%+%-]%s")
+(local ordered-list-item "^%s+[%d]%.%s")
 
 (local link "%[%[%C+%]%[%C+%]%]")
 (local link-part "%[%[(%C+)%]%[(%C+)%]%]")
@@ -35,18 +35,29 @@
 (var in-src false)
 (var in-export false)
 
+(var in-ol false)
+(var in-ul false)
+
 (fn node [type v r]
 
-  (case type
-    :begin-quote (set in-block true)
-    :begin-src (set in-src true)
-    :begin-export (set in-export true)
-    :end-quote (set in-block false)
-    :end-src (set in-src false)
-    :end-export (set in-export false))
+  (let [insert-type 
+        (if 
+          (and (= type :ul) in-ul) :ul-li 
+          (and (= type :ol) in-ol) :ol-li 
+          type)]
 
-  (let [s (string.gsub v r "")]
-    [type s]))
+    (case type
+      :begin-quote (set in-block true)
+      :begin-src (set in-src true)
+      :begin-export (set in-export true)
+      :end-quote (set in-block false)
+      :end-src (set in-src false)
+      :end-export (set in-export false)
+      :ul (set in-ul true)
+      :ol (set in-ol true))
+
+    (let [s (string.gsub v r "")]
+      [insert-type s])))
 
 (fn decorate-text [text t]
   (do 
@@ -86,8 +97,9 @@
       (string.match v heading-3) (node :heading-3 v heading-3)
       (string.match v heading-4) (node :heading-4 v heading-4)
       (string.match v html) (node :html v html)
-      (string.match v unordered-list) (node :ul v unordered-list)
-      (string.match v ordered-list) (node :ol v ordered-list)
+
+      (string.match v ordered-list-item) (node :ol v ordered-list-item)
+      (string.match v list-item) (node :ul v list-item)
 
       (string.match v begin-quote) (node :begin-quote "" begin-quote)
       (string.match v end-quote) (node :end-quote "" end-quote)

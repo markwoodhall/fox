@@ -16,6 +16,9 @@
 (local heading-3 "^%*%*%*%s")
 (local heading-4 "^%*%*%*%*%s")
 
+(local begin-ol "^%s*1%.%s")
+(local begin-ul "^%s*[%+%-]%s")
+
 (local list-item "%s+[%+%-]%s")
 (local ordered-list-item "^%s+[%d]%.%s")
 
@@ -31,33 +34,55 @@
 (local starts-inline "%~(%C)")
 (local ends-inline "(%C)%~")
 
+(local empty "^[%S%c]")
+
 (var in-block false)
 (var in-src false)
 (var in-export false)
 
-(var in-ol false)
-(var in-ul false)
+(var lists [])
+
+(local lines-done [])
+
+(fn last [c]
+  (?. c (length c)))
+
+(fn take [c i]
+  (table.move c 1 i 1 []))
+
+(fn but-last [c]
+  (take c (- (length c) 1)))
+
+(fn indented-by [v]
+  (var seen-non-whitespace false)
+  (accumulate [i 0 v (string.gmatch v ".")]
+    (do 
+      (when (not seen-non-whitespace)
+        (if (= v " ")
+          (set i (+ 1 i))
+          (set seen-non-whitespace true))) 
+      i)))
 
 (fn node [type v r]
-
-  (let [insert-type 
-        (if 
-          (and (= type :ul) in-ul) :ul-li 
-          (and (= type :ol) in-ol) :ol-li 
-          type)]
 
     (case type
       :begin-quote (set in-block true)
       :begin-src (set in-src true)
       :begin-export (set in-export true)
+      :begin-ol (table.insert lists :ol)
+      :begin-ul (table.insert lists :ul)
       :end-quote (set in-block false)
       :end-src (set in-src false)
-      :end-export (set in-export false)
-      :ul (set in-ul true)
-      :ol (set in-ol true))
+      :end-export (set in-export false))
 
-    (let [s (string.gsub v r "")]
-      [insert-type s])))
+    (let [before (if 
+                   (and (> (length lists) 0) 
+                        (< (indented-by v) (indented-by (last lines-done)))) 
+                   (let [t (last lists)]
+                     (set lists (but-last lists))
+                     t))
+          s (string.gsub v r "")]
+      [type s before]))
 
 (fn decorate-text [text t]
   (do 
@@ -88,39 +113,50 @@
       (decorate-text v acc))))
 
 (fn parse [org]
-  (icollect [v (string.gmatch org "%C+%C")]
-    (if 
-      (string.match v meta-title) (node :meta-title v meta-title)
+  (icollect [_ v (ipairs org)]
+    (let [out 
+          (if 
+            (string.match v meta-title) (node :meta-title v meta-title)
 
-      (string.match v heading-1) (node :heading-1 v heading-1)
-      (string.match v heading-2) (node :heading-2 v heading-2)
-      (string.match v heading-3) (node :heading-3 v heading-3)
-      (string.match v heading-4) (node :heading-4 v heading-4)
-      (string.match v html) (node :html v html)
+            (string.match v heading-1) (node :heading-1 v heading-1)
+            (string.match v heading-2) (node :heading-2 v heading-2)
+            (string.match v heading-3) (node :heading-3 v heading-3)
+            (string.match v heading-4) (node :heading-4 v heading-4)
+            (string.match v html) (node :html v html)
 
-      (string.match v ordered-list-item) (node :ol v ordered-list-item)
-      (string.match v list-item) (node :ul v list-item)
+            (string.match v begin-quote) (node :begin-quote "" begin-quote)
+            (string.match v end-quote) (node :end-quote "" end-quote)
 
-      (string.match v begin-quote) (node :begin-quote "" begin-quote)
-      (string.match v end-quote) (node :end-quote "" end-quote)
+            (string.match v begin-ol) (node :begin-ol v begin-ol)
+            (and 
+              (> (indented-by v) (indented-by (last lines-done)))
+              (string.match v begin-ul)) (node :begin-ul v begin-ul)
 
-      (string.match v begin-export) (node :begin-export "" begin-export)
-      (string.match v end-export) (node :end-export "" end-export)
+            (string.match v list-item) (node :li v list-item)
+            (string.match v ordered-list-item) (node :li v ordered-list-item)
 
-      (string.match v begin-src) (node :begin-src "" begin-src)
-      (string.match v end-src) (node :end-src "" end-src)
+            (string.match v begin-export) (node :begin-export "" begin-export)
+            (string.match v end-export) (node :end-export "" end-export)
 
-      (if 
-        in-block 
-        [:block-text v] 
-        in-export
-        [:export v]
-        in-src
-        [:code v]
-        [:text (parse-text v)]))))
+            (string.match v begin-src) (node :begin-src "" begin-src)
+            (string.match v end-src) (node :end-src "" end-src)
+
+            (= v "") (node :empty "" empty)
+
+            (if 
+              in-block 
+              [:block-text v] 
+              in-export
+              [:export v]
+              in-src
+              [:code v]
+              [:text (parse-text v)]))]
+      (when (not (= v "")) (table.insert lines-done v))
+      out)))
+      
 
 (comment
-  (let [f (require :file)
+  (lset [f (require :file)
         o (require :org)]
     (o.parse (f.read "readme.org"))))
 

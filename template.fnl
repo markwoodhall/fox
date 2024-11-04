@@ -44,20 +44,23 @@
 
 (fn apply-nodes [nodes]
   (accumulate [acc "" 
-               _ [node-type node] (ipairs nodes)]
+               _ [node-type node before] (ipairs nodes)]
     (.. 
       acc
+      (case before
+        :ol "</ol>"
+        :ul "</ul>"
+        _ "")
       (case node-type
         :heading-1 (.. "<h1>" node "</h1>")
         :heading-2 (.. "<h2>" node "</h2>")
         :heading-3 (.. "<h3>" node "</h3>")
         :heading-4 (.. "<h4>" node "</h4>")
-        :ol (.. "<ol><li>" node "</li>")
-        :ul (.. "<ul><li>" node "</li>")
-        :ol-li (.. "<li>" node "</li>")
-        :ul-li (.. "<li>" node "</li>")
         :begin-quote "<blockquote>"
         :end-quote "</blockquote>"
+        :begin-ol (.. "<ol><li>" node "</li>")
+        :begin-ul (.. "<ul><li>" node "</li>")
+        :li (.. "<li>" node "</li>")
         :begin-export ""
         :end-export ""
         :begin-src "<pre><code>"

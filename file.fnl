@@ -14,10 +14,17 @@
       _ (log.warn path "not found;"))
     (log.warn path "not found;")))
 
+(fn lines [path]
+  (if (exists? path)
+    (icollect [l (io.lines path)]
+      l)
+    (log.warn path "not found;")))
+
 (fn write [path data]
   (with-open [f (io.open path :w)]
     (io.output f)
     (io.write data)))
 
 {: read
+ : lines
  : write }

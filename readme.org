@@ -34,20 +34,25 @@
   The aim is to support the following subset of features to enable untuitive website creation:
 
   1. Structure
-
      + Headings
+        - Various Depth levels
+            1. Something else
+            2. What else is there?
+        - Names anchors
      + Code blocks
      + Block quoations
-
   2. Text
-
      + Bold/Italic/Strikethrough
      + Links
-
+            *Something deeper within*
   3. HTML
+    1. Inline
+    2. Block
+        1. Exporting
+        2. Something else
+    3. Again
 
-     + Inline HTML
-     + Block HTML
+
 
 * Who?
 

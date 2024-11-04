@@ -4,7 +4,7 @@
 
 (fn org->html [in template opts out]
   (let [template (file.read template)
-        org-file (file.read in)]
+        org-file (file.lines in)]
     (when (and org-file template)
       (let [org-data (org.parse org-file)
             _ (set opts.org org-data)

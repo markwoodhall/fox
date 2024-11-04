@@ -27,6 +27,12 @@
         "")
       )))
 
+(fn apply-links [text]
+  (string.gsub
+    text
+    "%[%[(%C+)%]%[(%C+)%]%]"
+    "<a href=\"%1\">%2</a>"))
+
 (fn apply-text [text]
   (accumulate [acc ""
                _ [type data] (ipairs text)]
@@ -34,13 +40,15 @@
         (case type
           :begin-bold "<b>"
           :end-bold "</b>"
+          :begin-strike "<strike>"
+          :end-strike "</strike>"
+          :begin-underline "<u>"
+          :end-underline "</u>"
           :begin-italic "<i>"
           :end-italic "</i>"
           :begin-inline "<code>"
           :end-inline "</code>"
-          :words (?. data 1)
-          :links (accumulate [links "" _ [href desc] (ipairs data)]
-                   (.. links "<a href=\"" href "\">" desc "</a> "))))))
+          :words (?. data 1)))))
 
 (fn apply-nodes [nodes]
   (accumulate [acc "" 
@@ -58,9 +66,9 @@
         :heading-4 (.. "<h4>" node "</h4>")
         :begin-quote "<blockquote>"
         :end-quote "</blockquote>"
-        :begin-ol (.. "<ol><li>" node "</li>")
-        :begin-ul (.. "<ul><li>" node "</li>")
-        :li (.. "<li>" node "</li>")
+        :begin-ol (.. "<ol><li>" (apply-text node) "</li>")
+        :begin-ul (.. "<ul><li>" (apply-text node) "</li>")
+        :li (.. "<li>" (apply-text node) "</li>")
         :begin-export ""
         :end-export ""
         :begin-src "<pre><code>"
@@ -76,7 +84,8 @@
 (fn apply-main [nodes html]
   (apply-variable 
     "${main}"
-    (apply-nodes nodes)
+    (-> (apply-nodes nodes)
+        (apply-links))
     html))
 
 (fn apply-title [nodes html]

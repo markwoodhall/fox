@@ -22,17 +22,20 @@
 (local list-item "%s+[%+%-]%s")
 (local ordered-list-item "^%s+[%d]%.%s")
 
-(local link "%[%[%C+%]%[%C+%]%]")
-(local link-part "%[%[(%C+)%]%[(%C+)%]%]")
-
 (local starts-bold "%*(%C)")
 (local ends-bold "(%C)%*")
+
+(local starts-strike "%+(%S)")
+(local ends-strike "(%C)%+")
+
+(local starts-underline "%_(%S)")
+(local ends-underline "(%C)%_")
 
 (local starts-italic "%/(%C)")
 (local ends-italic "(%C)%/")
 
-(local starts-inline "%~(%C)")
-(local ends-inline "(%C)%~")
+(local starts-inline "[%~%=](%C)")
+(local ends-inline "(%C)[%~%=]")
 
 (local empty "^[%S%c]")
 
@@ -63,27 +66,6 @@
           (set seen-non-whitespace true))) 
       i)))
 
-(fn node [type v r]
-
-    (case type
-      :begin-quote (set in-block true)
-      :begin-src (set in-src true)
-      :begin-export (set in-export true)
-      :begin-ol (table.insert lists :ol)
-      :begin-ul (table.insert lists :ul)
-      :end-quote (set in-block false)
-      :end-src (set in-src false)
-      :end-export (set in-export false))
-
-    (let [before (if 
-                   (and (> (length lists) 0) 
-                        (< (indented-by v) (indented-by (last lines-done)))) 
-                   (let [t (last lists)]
-                     (set lists (but-last lists))
-                     t))
-          s (string.gsub v r "")]
-      [type s before]))
-
 (fn decorate-text [text t]
   (do 
     (when (string.match text starts-bold)
@@ -92,7 +74,17 @@
       (table.insert t [:begin-italic]))
     (when (string.match text starts-inline)
       (table.insert t [:begin-inline]))
-    (table.insert t [:words [(string.gsub text "[%*%/%~]" "")]])
+    (when (string.match text starts-strike)
+      (table.insert t [:begin-strike]))
+    (when (string.match text starts-underline)
+      (table.insert t [:begin-underline]))
+    (let [cleaned (string.gsub text "^[%*%/%~%+%_]" "")
+          cleaned (string.gsub cleaned "[%*%/%~%+%_]%s$" " ")]
+      (table.insert t [:words [cleaned]]))
+    (when (string.match text ends-underline)
+      (table.insert t [:end-underline]))
+    (when (string.match text ends-strike)
+      (table.insert t [:end-strike]))
     (when (string.match text ends-bold)
       (table.insert t [:end-bold]))
     (when (string.match text ends-italic)
@@ -103,14 +95,33 @@
 
 (fn parse-text [text]
   (accumulate [acc [] v (string.gmatch text "%S+%S?%s?")]
-    (if (string.match v link) 
-      (do 
-        (table.insert 
-            acc 
-            [:links (icollect [l l2 (string.gmatch v link-part)] 
-                      [l l2])])
-        acc)
-      (decorate-text v acc))))
+    (decorate-text v acc)))
+
+(fn node [type v r]
+    (case type
+      :begin-quote (set in-block true)
+      :begin-src (set in-src true)
+      :begin-export (set in-export true)
+      :begin-ol (table.insert lists :ol)
+      :begin-ul (table.insert lists :ul)
+      :end-quote (set in-block false)
+      :end-src (set in-src false)
+      :end-export (set in-export false))
+
+    (let [before (when (and (> (length lists) 0) 
+                            (< (indented-by v) (indented-by (last lines-done)))) 
+                   (let [t (last lists)]
+                     (set lists (but-last lists))
+                     t))
+          s (string.gsub v r "")]
+      [type (if 
+              (= type :li)
+              (parse-text s)
+              (= type :begin-ol)
+              (parse-text s)
+              (= type :begin-ul)
+              (parse-text s)
+              s) before]))
 
 (fn parse [org]
   (icollect [_ v (ipairs org)]

@@ -24,6 +24,8 @@
             (?. arguments.org 1) 
             (or (?. arguments.template 1) "templates/simple.html")
             {:css (?. arguments.css 1)
+             :head (?. arguments.head 1)
+             :header (?. arguments.header 1)
              :footer (?. arguments.footer 1)})
           (?. arguments.output 1)
           io.stdout))))

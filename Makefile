@@ -39,6 +39,6 @@ install: $(FOX)
 	@echo "Installing.."
 	mkdir -p /opt/fox
 	cp $(FOX) /opt/fox/fox
-	cp -r templates /opt/fox/templates
+	cp -r templates /opt/fox/
 
 .PHONY: clean install repl example generate

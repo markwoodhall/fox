@@ -17,6 +17,12 @@
       css-href
       html)))
 
+(fn apply-head [head html]
+  (apply-variable
+    "${head}"
+    (or head "")
+    html))
+
 (fn apply-node [nodes type]
   (accumulate [acc "" 
                _ [node-type node] (ipairs nodes)]
@@ -30,7 +36,7 @@
 (fn apply-links [text]
   (string.gsub
     text
-    "%[%[(%C+)%]%[(%C+)%]%]"
+    "%[%[([^%]]+)%]%[([^%]]+)%]%]"
     "<a href=\"%1\">%2</a>"))
 
 (fn apply-text [text]
@@ -96,18 +102,19 @@
     (apply-node nodes :meta-title)
     html))
 
-(fn apply-header [nodes html]
+(fn apply-header [data html]
   (apply-variable 
     "${header}"
-    (apply-node nodes :meta-title)
+    (or data.header (apply-node data.org :meta-title))
     html))
 
 (fn apply-template [data html]
   (->> 
     html
     (apply-css data.css)
+    (apply-head data.head)
     (apply-title data.org)
-    (apply-header data.org)
+    (apply-header data)
     (apply-main data.org)
     (apply-footer data.footer)))
 

@@ -29,6 +29,7 @@
       (match val
         "html" (start-new-command "html")
 
+        "--template" (start-new-command "template")
         "--org" (start-new-command "org")
         "--css" (start-new-command "css")
         "--footer" (start-new-command "footer")

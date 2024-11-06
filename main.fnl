@@ -22,7 +22,7 @@
         (display.render
           (fox.org->html 
             (?. arguments.org 1) 
-            "templates/simple.html"
+            (or (?. arguments.template 1) "templates/simple.html")
             {:css (?. arguments.css 1)
              :footer (?. arguments.footer 1)})
           (?. arguments.output 1)

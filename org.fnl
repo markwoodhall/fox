@@ -1,3 +1,4 @@
+(local file (require :file))
 (local meta-title "^%#%+TITLE:%s")
 
 (local begin-quote "%#%+BEGIN_QUOTE%s?")
@@ -16,14 +17,14 @@
 (local heading-3 "^%*%*%*%s")
 (local heading-4 "^%*%*%*%*%s")
 
-(local begin-ol "^%s*1%.%s")
+(local begin-ol "^%s*1[%.%)]%s")
 (local begin-ul "^%s*[%+%-]%s")
 
-(local list-item "%s+[%+%-]%s")
-(local ordered-list-item "^%s+[%d]%.%s")
+(local list-item "^%s+[%+%-]%s")
+(local ordered-list-item "^%s*[%d+][%.%)]%s")
 
-(local starts-bold "%*(%C)")
-(local ends-bold "(%C)%*")
+(local starts-bold "%*(.*)")
+(local ends-bold "(.*)%*")
 
 (local starts-strike "%+(%S)")
 (local ends-strike "(%C)%+")
@@ -79,7 +80,7 @@
     (when (string.match text starts-underline)
       (table.insert t [:begin-underline]))
     (let [cleaned (string.gsub text "^[%*%/%~%+%_]" "")
-          cleaned (string.gsub cleaned "[%*%/%~%+%_]%s$" " ")]
+          cleaned (string.gsub cleaned "[%*%/%~%+%_]%s*$" " ")]
       (table.insert t [:words [cleaned]]))
     (when (string.match text ends-underline)
       (table.insert t [:end-underline]))
@@ -109,11 +110,12 @@
       :end-export (set in-export false))
 
     (let [before (when (and (> (length lists) 0) 
-                            (< (indented-by v) (indented-by (last lines-done)))) 
+                            (or (< (indented-by v) (indented-by (last lines-done)))
+                                (not= type :li))) 
                    (let [t (last lists)]
                      (set lists (but-last lists))
                      t))
-          s (string.gsub v r "")]
+          s (if r (string.gsub v r "") v)]
       [type (if 
               (= type :li)
               (parse-text s)
@@ -123,11 +125,18 @@
               (parse-text s)
               s) before]))
 
+(local incl "^%s*%#%+INCLUDE")
+
 (fn parse [org]
   (icollect [_ v (ipairs org)]
     (let [out 
           (if 
             (string.match v meta-title) (node :meta-title v meta-title)
+
+            (string.match v incl) 
+            (let [included (accumulate [f "" m (string.gmatch v "%s\"(.+)\"")]
+                         (.. f m))] 
+              (node :include (parse (file.lines included))))
 
             (string.match v heading-1) (node :heading-1 v heading-1)
             (string.match v heading-2) (node :heading-2 v heading-2)
@@ -152,16 +161,15 @@
             (string.match v begin-src) (node :begin-src "" begin-src)
             (string.match v end-src) (node :end-src "" end-src)
 
-            (= v "") (node :empty "" empty)
+            (= v "") (if in-block (node :empty-in-block "" empty) (node :empty "" empty))
 
-            (if 
-              in-block 
-              [:block-text v] 
-              in-export
-              [:export v]
-              in-src
-              [:code v]
-              [:text (parse-text v)]))]
+            in-block 
+            [:block-text (parse-text v)] 
+            in-export
+            [:export v]
+            in-src
+            [:code v]
+            [:text (parse-text v)])]
       (when (not (= v "")) (table.insert lines-done v))
       out)))
       

@@ -77,7 +77,9 @@
         :export node
         :html node
         :code (.. (string.gsub node "%s" "&nbsp;") "<br />")
-        :block-text (.. node "<br />")
+        :include (apply-nodes node)
+        :block-text (.. (apply-text node) "<br />")
+        :empty-in-block "<br />"
         _ "")
       )))
 

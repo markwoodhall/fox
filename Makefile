@@ -35,4 +35,10 @@ generate: $(FOX)
 		--footer "This website was generated with Fox" \
 		> docs/readme.html
 
-.PHONY: clean install repl
+install: $(FOX)
+	@echo "Installing.."
+	mkdir -p /opt/fox
+	cp $(FOX) /opt/fox/fox
+	cp -r templates /opt/fox/templates
+
+.PHONY: clean install repl example generate
